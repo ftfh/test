@@ -4,7 +4,7 @@ import { TreeView } from './components/TreeView';
 import SearchBar from './components/SearchBar';
 import { useJsonParser } from './hooks/useJsonParser';
 import { useSearch } from './hooks/useSearch';
-import { FileText, Search, Code, Minimize2 } from 'lucide-react';
+import { Braces, Search, Code, Minimize2 } from 'lucide-react';
 
 const SAMPLE_JSON = `{
   "name": "John Doe",
@@ -83,7 +83,7 @@ function App() {
       <div className="bg-white border-b shadow-sm px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <FileText size={24} className="text-blue-600" />
+            <Braces size={24} className="text-gray-800" />
             <h1 className="text-2xl font-bold text-gray-800">JSON Viewer</h1>
           </div>
           

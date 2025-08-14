@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FC } from 'react';
 
 interface HighlightedTextProps {
   text: string;
@@ -7,7 +7,7 @@ interface HighlightedTextProps {
   className?: string;
 }
 
-export const HighlightedText: React.FC<HighlightedTextProps> = ({
+export const HighlightedText: FC<HighlightedTextProps> = ({
   text,
   searchTerm,
   currentMatchIndex = 0,

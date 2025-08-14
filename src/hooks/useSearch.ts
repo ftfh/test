@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-export interface SearchMatch {
+interface SearchMatch {
   index: number;
   start: number;
   end: number;

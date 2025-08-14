@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Copy, Expand, Minimize2 } from 'lucide-react';
-import { SearchBar } from './SearchBar';
+import { useState, type FC } from 'react';
+import { ChevronRight, ChevronDown, Copy, Expand, Minimize2, Search } from 'lucide-react';
+import SearchBar from './SearchBar';
 import { HighlightedText } from './HighlightedText';
 import { useSearch } from '../hooks/useSearch';
 
@@ -8,7 +8,6 @@ interface TreeNodeProps {
   data: any;
   keyName?: string;
   level?: number;
-  isLast?: boolean;
   path?: string[];
   onSelectPath?: (path: string[], value: any) => void;
   selectedPath?: string[];
@@ -18,11 +17,10 @@ interface TreeNodeProps {
   currentMatchIndex?: number;
 }
 
-export const TreeNode: React.FC<TreeNodeProps> = ({ 
+export const TreeNode: FC<TreeNodeProps> = ({ 
   data, 
   keyName, 
   level = 0, 
-  isLast = true, 
   path = [], 
   onSelectPath,
   selectedPath = [],
@@ -173,13 +171,12 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
       
       {isExpanded && (
         <div className="border-l-2 border-gray-200 ml-2">
-          {entries.map(([key, value], index) => (
+          {entries.map(([key, value]) => (
             <TreeNode
               key={key}
               data={value}
               keyName={String(key)}
               level={level + 1}
-              isLast={index === entries.length - 1}
               path={currentPath}
               onSelectPath={onSelectPath}
               selectedPath={selectedPath}
@@ -200,11 +197,12 @@ interface TreeViewProps {
   title: string;
 }
 
-export const TreeView: React.FC<TreeViewProps> = ({ data, title }) => {
+export const TreeView: FC<TreeViewProps> = ({ data, title }) => {
   const [selectedPath, setSelectedPath] = useState<string[]>([]);
   const [selectedValue, setSelectedValue] = useState<any>(null);
   const [expandedState, setExpandedState] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   
   const jsonString = data ? JSON.stringify(data, null, 2) : '';
   const { currentMatchIndex, totalMatches, goToNextMatch, goToPrevMatch } = useSearch(jsonString, searchTerm);
@@ -222,8 +220,11 @@ export const TreeView: React.FC<TreeViewProps> = ({ data, title }) => {
     }));
   };
 
-  const handleClear = () => {
-    setSearchTerm('');
+  const handleToggleSearch = () => {
+    setShowSearch(!showSearch);
+    if (showSearch) {
+      setSearchTerm(''); // Clear search when hiding
+    }
   };
 
   const expandAll = () => {
@@ -287,16 +288,32 @@ export const TreeView: React.FC<TreeViewProps> = ({ data, title }) => {
       <div className="h-full flex flex-col">
         <div className="bg-gray-50 border-b px-4 py-2 text-sm font-medium text-gray-700 flex justify-between items-center">
           {title}
+          <div className="flex space-x-2">
+            <button
+              onClick={handleToggleSearch}
+              className={`flex items-center space-x-1 px-2 py-1 text-xs border border-gray-200 rounded hover:bg-gray-50 transition-colors ${
+                showSearch 
+                  ? 'bg-blue-100 text-blue-700 border-blue-300' 
+                  : 'bg-white text-gray-700'
+              }`}
+              title="Search (Ctrl+F)"
+            >
+              <Search size={12} />
+              <span>Search</span>
+            </button>
+          </div>
         </div>
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          currentMatch={currentMatchIndex}
-          totalMatches={totalMatches}
-          onNextMatch={goToNextMatch}
-          onPrevMatch={goToPrevMatch}
-          onClear={handleClear}
-        />
+        {showSearch && (
+          <SearchBar
+            searchQuery={searchTerm}
+            onSearchChange={setSearchTerm}
+            currentMatchIndex={currentMatchIndex}
+            totalMatches={totalMatches}
+            onPrevious={goToPrevMatch}
+            onNext={goToNextMatch}
+            onClose={handleToggleSearch}
+          />
+        )}
         <div className="flex-1 flex items-center justify-center text-gray-500">
           No valid JSON to display
         </div>
@@ -309,6 +326,18 @@ export const TreeView: React.FC<TreeViewProps> = ({ data, title }) => {
       <div className="bg-gray-50 border-b px-4 py-2 text-sm font-medium text-gray-700 flex justify-between items-center">
         {title}
         <div className="flex space-x-2">
+          <button
+            onClick={handleToggleSearch}
+            className={`flex items-center space-x-1 px-2 py-1 text-xs border border-gray-200 rounded hover:bg-gray-50 transition-colors ${
+              showSearch 
+                ? 'bg-blue-100 text-blue-700 border-blue-300' 
+                : 'bg-white text-gray-700'
+            }`}
+            title="Search (Ctrl+F)"
+          >
+            <Search size={12} />
+            <span>Search</span>
+          </button>
           <button
             onClick={expandAll}
             className="flex items-center space-x-1 px-2 py-1 text-xs bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors"
@@ -328,15 +357,17 @@ export const TreeView: React.FC<TreeViewProps> = ({ data, title }) => {
         </div>
       </div>
       
-      <SearchBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        currentMatch={currentMatchIndex}
-        totalMatches={totalMatches}
-        onNextMatch={goToNextMatch}
-        onPrevMatch={goToPrevMatch}
-        onClear={handleClear}
-      />
+      {showSearch && (
+        <SearchBar
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          currentMatchIndex={currentMatchIndex}
+          totalMatches={totalMatches}
+          onPrevious={goToPrevMatch}
+          onNext={goToNextMatch}
+          onClose={handleToggleSearch}
+        />
+      )}
 
       {/* Path Breadcrumb */}
       {selectedPath.length > 0 && (
